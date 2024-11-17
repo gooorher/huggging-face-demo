@@ -1,19 +1,36 @@
-push: 
-  branches: [ main ]
+name: Sync to Hugging Face Hub
 
+on:
+  push:
+    branches: [ main ]
   workflow_dispatch:
 
-
-jobs: 
+jobs:
   sync-to-hub:
-  runs-on: ubuntu-latest
-  steps: 
-    - uses: actions/checkout@v2
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
       with:
         fetch-depth: 0
 
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
     - name: Add remote
       env:
-        huggingface: ${{ secrets.huggingface }}
-      run: git remote add space
-    
+        huggingface: ${{ secrets.HUGGINGFACE_TOKEN }}
+      run: git remote add space https://huggingface.co/spaces/gooorher/github-actions-demo
+
+    - name: Push to Hub
+      env:
+        huggingface: ${{ secrets.HUGGINGFACE_TOKEN }}
+      run: git push space main
